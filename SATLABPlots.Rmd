@@ -65,10 +65,12 @@ Aerosol <- Aerosol %>%
 ```
 
 ```{r}
-AerosolMonth<- Aerosol%>%
-  group_by(Month, Year)%>%
-  summarise(meanMonth = mean(Mean)) 
+
 AerosolMonth <- Aerosol %>%
+
+  group_by(Month, Year)%>%
+  summarise(meanMonth = mean(Mean)) %>%
+
  mutate(
     YearName = case_when(
       Year =='2016' ~ "2016",
@@ -93,8 +95,6 @@ AerosolMonth <- Aerosol %>%
     mutate(Month_Name = factor(Month_Name))
 AerosolMonth$Month_Name <- fct_reorder(AerosolMonth$Month_Name,  AerosolMonth$Month,min )
 AerosolMonth$YearName <- as.factor(AerosolMonth$YearName)
-
-
 ```
 
 
@@ -107,7 +107,15 @@ ggplot(data = Aerosol,
 
 ggplot(data = AerosolMonth, 
        mapping = aes(x = YearName,
-                     y = Mean,
+                     y = meanMonth,
+                     fill = YearName)) +  geom_boxplot() + theme_bw()
+ggplot(data = AerosolMonth, 
+       mapping = aes(x = Month_Name,
+                     y = meanMonth,
+                     fill = Month_Name)) +  geom_boxplot() + theme_bw()
+ggplot(data = AerosolMonth, 
+       mapping = aes(x = Month_Name,
+                     y = meanMonth,
                      fill = Month_Name)) +  geom_boxplot() + theme_bw()
 
 
