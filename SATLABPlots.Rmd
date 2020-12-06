@@ -1,0 +1,118 @@
+---
+title: "SATLABPlots"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(lubridate)
+```
+
+```{r}
+Aerosol <- read_csv("AerosolDepth.csv")
+
+
+```
+
+
+```{r}
+##making the time stamp and actual date
+names(Aerosol)[names(Aerosol)=="Time"] <- "date"
+Aerosol$date <- as.POSIXct(Aerosol$date, format = '%m/%d/%y')
+Aerosol<- Aerosol %>%
+separate(date, sep="-", into = c("Year", "Month", "Day"))
+##Now we have year month day and hour but they are in chr formats so lets make it into a num
+Aerosol$Year <- as.numeric(Aerosol$Year)
+Aerosol$Month <- as.numeric(Aerosol$Month)
+Aerosol$Day <- as.numeric(Aerosol$Day)
+Aerosol$date <- 0
+Aerosol <- Aerosol  %>%
+      mutate( date = make_date(Year, Month, Day )  )
+
+
+Aerosol <- Aerosol %>%
+ mutate(
+    YearName = case_when(
+      Year =='2016' ~ "2016",
+      Year == '2017'~ "2017",
+      Year == '2018'~ "2018",
+      Year == '2019'~ "2019",
+      Year == '2020'~ "2020")) %>%
+  mutate(
+    Month_Name = case_when(
+      Month == '1' ~ "January",
+      Month == '2' ~ "February",
+      Month == '3' ~ "March",
+      Month == '4' ~ "April",
+      Month == '5' ~ "May",
+      Month == '6' ~ "June",
+      Month == '7' ~ "July",
+      Month == '8' ~ "August",
+      Month == '9' ~ "September",
+      Month == '10' ~ "October",
+      Month == '11' ~ "November",
+      Month == '12' ~ "December"))%>%
+    mutate(Month_Name = factor(Month_Name))
+Aerosol$Month_Name <- fct_reorder(Aerosol$Month_Name,  Aerosol$Month,min )
+Aerosol$YearName <- as.factor(Aerosol$YearName)
+##adding some filters on to the mean values (this is the values that giovanni filters in)
+Aerosol <- Aerosol %>%
+    filter(Mean <0.118793
+  )%>%
+  filter(Mean > 0.00495)
+
+```
+
+```{r}
+AerosolMonth<- Aerosol%>%
+  group_by(Month, Year)%>%
+  summarise(meanMonth = mean(Mean)) 
+AerosolMonth <- Aerosol %>%
+ mutate(
+    YearName = case_when(
+      Year =='2016' ~ "2016",
+      Year == '2017'~ "2017",
+      Year == '2018'~ "2018",
+      Year == '2019'~ "2019",
+      Year == '2020'~ "2020")) %>%
+  mutate(
+    Month_Name = case_when(
+      Month == '1' ~ "January",
+      Month == '2' ~ "February",
+      Month == '3' ~ "March",
+      Month == '4' ~ "April",
+      Month == '5' ~ "May",
+      Month == '6' ~ "June",
+      Month == '7' ~ "July",
+      Month == '8' ~ "August",
+      Month == '9' ~ "September",
+      Month == '10' ~ "October",
+      Month == '11' ~ "November",
+      Month == '12' ~ "December"))%>%
+    mutate(Month_Name = factor(Month_Name))
+AerosolMonth$Month_Name <- fct_reorder(AerosolMonth$Month_Name,  AerosolMonth$Month,min )
+AerosolMonth$YearName <- as.factor(AerosolMonth$YearName)
+
+
+```
+
+
+```{r}
+
+ggplot(data = Aerosol, 
+       mapping = aes(x = Month_Name,
+                     y = Mean,
+                     fill = YearName)) +  geom_boxplot() + theme_bw()
+
+ggplot(data = AerosolMonth, 
+       mapping = aes(x = YearName,
+                     y = Mean,
+                     fill = Month_Name)) +  geom_boxplot() + theme_bw()
+
+
+```
+
+
+
+
